@@ -118,7 +118,6 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	scene.add(light);
 
 	scene.add(new THREE.HemisphereLight('#abc', '#543', 1));
-
 	light=new THREE.PointLight('#fff', 0.01, 0, 1.5);
 	//light.position.position.set;
 	scene.add(light);
@@ -137,7 +136,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	oControls.update();
 	 targPos = vec3(-42, 11, 0);
-	var pos0=camera.position.set(400,400,-400).clone();
+	var pos0=camera.position.set(400,400,-600).clone();
+
+	scene.add(camera);
+	scene.rotation.y=1.8;
 	
 	requestAnimationFrame(function animate(){
 
