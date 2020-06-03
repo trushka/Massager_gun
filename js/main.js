@@ -67,7 +67,7 @@ var loaded1, loaded2, paused, telOpacity,
 new THREE.RGBELoader()
  .setDataType( THREE.UnsignedByteType )
  //.setPath( 'textures/equirectangular/' )
- .load( 'pedestrian_overpass_2k.hdr', function ( texture ) {
+ .load( 'pedestrian_overpass_1k.hdr', function ( texture ) {
 
 	var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
@@ -85,19 +85,22 @@ var loader = new THREE.GLTFLoader();
 var dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath( 'js/' );
 loader.setDRACOLoader( dracoLoader );
-var mGun;
+var mGun, fan;//, header = new THREE.Group();
 loader.load( 'm_gun.glb', function ( obj ) {
 
 	scene.add(mGun=obj.scene.getObjectByName('M_gun'));
+	fan=scene.getObjectByName('Fan');
 	mGun.scale.multiplyScalar(10);
 
-	scene.traverse(o=>{if (o.isMesh) {
+	mGun.traverse(o=>{if (o.isMesh) {
 
-		//THREE.BufferGeometryUtils.mergeVertices(o.geometry);
+		//if (/(Sphere)|(Element)|(Patron)/.test(o.name)) header.add(o);
+
 		o.geometry.computeVertexNormalsFine();
 		o.material.flatShading=false;
+		//o.material.side=0;
 
-	}});
+	}})//.add(header);
 
 	// var screen=scene.getObjectByName('screen')
 	// screen.material = new THREE.MeshBasicMaterial({
@@ -125,7 +128,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	oControls=new THREE.OrbitControls(camera, renderer.domElement);
 	//oControls.target.set(0,80.8,0);
 
-	var k0=.02, k=.02, hidePhone, targDistance;
+	var k0=.02, k=.008, hidePhone, targDistance;
 
 	var time, prevTime;
 	//oControls.update;
@@ -146,6 +149,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		requestAnimationFrame(animate);
 
 		if (paused || !loaded1 || !loaded2) return;
+		fan.rotation.y+=.35;
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
