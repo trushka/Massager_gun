@@ -85,22 +85,27 @@ var loader = new THREE.GLTFLoader();
 var dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath( 'js/' );
 loader.setDRACOLoader( dracoLoader );
-var mGun, fan;//, header = new THREE.Group();
+var mGun, fan, header = new THREE.Group();
 loader.load( 'm_gun.glb', function ( obj ) {
 
 	scene.add(mGun=obj.scene.getObjectByName('M_gun'));
+
 	fan=scene.getObjectByName('Fan');
 	mGun.scale.multiplyScalar(10);
+	mGun.position.y=-.7;
 
 	mGun.traverse(o=>{if (o.isMesh) {
 
-		//if (/(Sphere)|(Element)|(Patron)/.test(o.name)) header.add(o);
+		//if (/()|()|()/.test(o.name)) header.add(o);
 
 		o.geometry.computeVertexNormalsFine();
 		o.material.flatShading=false;
 		//o.material.side=0;
 
-	}})//.add(header);
+	}});
+	mGun.add(header);
+
+	header.add(scene.getObjectByName('Sphere'), scene.getObjectByName('Patron'));
 
 	// var screen=scene.getObjectByName('screen')
 	// screen.material = new THREE.MeshBasicMaterial({
@@ -128,9 +133,11 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	oControls=new THREE.OrbitControls(camera, renderer.domElement);
 	//oControls.target.set(0,80.8,0);
 
-	var k0=.02, k=.008, hidePhone, targDistance;
+	var k0=.02, k=.025,
+	 hidePhone, targDistance,
+	 t0=performance.now(), tCor=20, // 1000ms / 50fps
+	 tMax=100;
 
-	var time, prevTime;
 	//oControls.update;
 	//oControls.enableDamping=true;
 	//oControls.autoRotate=true;
@@ -139,7 +146,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	oControls.update();
 	 targPos = vec3(-42, 11, 0);
-	var pos0=camera.position.set(400,400,-600).clone();
+	var pos0=camera.position.set(300,800,-1200).clone();
 
 	scene.add(camera);
 	scene.rotation.y=1.8;
@@ -149,13 +156,20 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		requestAnimationFrame(animate);
 
 		if (paused || !loaded1 || !loaded2) return;
-		fan.rotation.y+=.35;
+		//paused=true;
+		var now=performance.now(),
+		 dt=Math.min(tMax, now-t0),
+		 tScale=dt/tCor;
+
+		t0=now;
+
+		fan.rotation.y+=.35*tScale;
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
-		if (k<k0) k+=.0002;
+		//if (k<k0) k+=.0002;
 		if (!oControls.autoRotate || animation.stage>6)
-		 camera.position.add(deltaPos.multiplyScalar(k)).add(deltaPos.cross(camera.up).multiplyScalar(2));
+		 camera.position.add(deltaPos.multiplyScalar(k)).add(deltaPos.cross(camera.up).multiplyScalar(2*tScale));
 
 		oControls.update();
 
