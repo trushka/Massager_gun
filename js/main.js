@@ -105,7 +105,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	}});
 	mGun.add(header);
 
-	header.add(scene.getObjectByName('Sphere'), scene.getObjectByName('Patron'));
+	header.add(scene.getObjectByName('sphere'), scene.getObjectByName('Patron'));
 
 	// var screen=scene.getObjectByName('screen')
 	// screen.material = new THREE.MeshBasicMaterial({
@@ -146,7 +146,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	oControls.update();
 	 targPos = vec3(-42, 11, 0);
-	var pos0=camera.position.set(300,800,-1200).clone();
+	var pos0=camera.position.set(300,700,-650).clone();
 
 	scene.add(camera);
 	scene.rotation.y=1.8;
@@ -169,7 +169,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		//if (k<k0) k+=.0002;
 		if (!oControls.autoRotate || animation.stage>6)
-		 camera.position.add(deltaPos.multiplyScalar(k)).add(deltaPos.cross(camera.up).multiplyScalar(2*tScale));
+		 camera.position.add(deltaPos.multiplyScalar(k*tScale)).add(deltaPos.cross(camera.up).multiplyScalar(2));
 
 		oControls.update();
 
