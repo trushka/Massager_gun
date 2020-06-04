@@ -85,7 +85,13 @@ var loader = new THREE.GLTFLoader();
 var dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath( 'js/' );
 loader.setDRACOLoader( dracoLoader );
-var mGun, fan, header = new THREE.Group();
+var mGun, fan, display,
+ dMaterial=new THREE.MeshBasicMaterial({
+ 	color: '#020304',
+ 	transparent: true,
+ 	blending: 3
+ }),
+ header = new THREE.Group();
 loader.load( 'm_gun.glb', function ( obj ) {
 
 	scene.add(mGun=obj.scene.getObjectByName('M_gun'));
@@ -96,7 +102,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	mGun.traverse(o=>{if (o.isMesh) {
 
-		//if (/()|()|()/.test(o.name)) header.add(o);
+		if (/Glass/.test(o.name)) {
+			o.renderOrder=1;
+			o.material.depthWrite=false;
+		}
+		if (/(Digit)|(Power)/.test(o.parent.name+o.name)) {
+			o.renderOrder=2;
+			o.material=dMaterial
+		}
 
 		o.geometry.computeVertexNormalsFine();
 		o.material.flatShading=false;
