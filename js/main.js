@@ -87,7 +87,7 @@ dracoLoader.setDecoderPath( 'js/' );
 loader.setDRACOLoader( dracoLoader );
 var mGun, fan, display,
  dMaterial=new THREE.MeshBasicMaterial({
- 	color: '#123',
+ 	color: '#124',
  	transparent: true,
  	blending: 2
  }),
