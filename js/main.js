@@ -9,6 +9,18 @@ var lightPositions=[
 	[24.5, 56.6, -6],
 	[24.5, 43, -6],
 ];
+var segments=[
+	[1,2,3,4,5,6],
+	[1,2],
+	[6,0,3,1,2],
+	[6,1,0,4,2,3],
+	[1,2,0,5],
+	[6,3,0,5,2],
+	[6,5,4,3,2,0],
+	[6,1,2],
+	[1,2,3,4,5,6,0],
+	[3,2,1,6,5,0]
+]
 
 
 var container=document.querySelector('#_3d'), canvas = container.firstChild;
@@ -85,9 +97,9 @@ var loader = new THREE.GLTFLoader();
 var dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath( 'js/' );
 loader.setDRACOLoader( dracoLoader );
-var mGun, fan, display,
+var mGun, fan, display, digits=[0, [],[],[],[]],
  dMaterial=new THREE.MeshBasicMaterial({
- 	color: '#124',
+ 	color: '#0818cc',
  	transparent: true,
  	blending: 2
  }),
@@ -108,7 +120,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		}
 		if (/(Digit)|(Power)/.test(o.parent.name+o.name)) {
 			o.renderOrder=2;
-			o.material=dMaterial
+			o.material=dMaterial;
+
+			var match=o.name.match(/^\d/);
+
+			if (match) {
+				digits[o.parent.name.replace('Digit', '')][match[0]]=o;
+				o.visible=false;
+			}
 		}
 
 		o.geometry.computeVertexNormalsFine();
@@ -176,7 +195,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		t0=now;
 
-		fan.rotation.y+=.35*tScale;
+		fan.rotation.y+=.15*tScale;
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
@@ -186,6 +205,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		oControls.update();
 
+		var velosity = 10.5*(1+Math.sin(now/2333))+.5;
+		setDigit(1, Math.floor(velosity/10));
+		setDigit(2, Math.floor(velosity%10));
+
+		var force = 4.5*(1+Math.cos(now/1811))+75.5;
+		setDigit(3, Math.floor(force/10));
+		setDigit(4, Math.floor(force%10));
+
 		renderer.render( scene, camera );
 
 		//prevTime = time;
@@ -194,3 +221,15 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	if (loaded2) renderer.domElement.style.opacity=1;
 	loaded1=true;
 } );
+
+function setDigit(digit, value) {
+	if (!digits[digit] || digits[digit].value===value) return;
+	digits[digit].value=value;
+	digits[digit].forEach(function(seg, i){
+		seg.visible=false;
+	});
+	(segments[value]||[]).forEach(function(seg, i){
+		digits[digit][seg].visible=true;
+	})
+}
+
