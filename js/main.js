@@ -12,8 +12,8 @@ var lightPositions=[
 var segments=[
 	[1,2,3,4,5,6],
 	[1,2],
-	[6,0,3,1,2],
-	[6,1,0,4,2,3],
+	[6,1,0,4,3],
+	[6,1,0,3,2],
 	[1,2,0,5],
 	[6,3,0,5,2],
 	[6,5,4,3,2,0],
@@ -205,11 +205,11 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		oControls.update();
 
-		var velosity = 10.5*(1+Math.sin(now/2333))+.5;
+		var velosity = 5.5*(1+Math.sin(now/2000))+5;
 		setDigit(1, Math.floor(velosity/10));
 		setDigit(2, Math.floor(velosity%10));
 
-		var force = 4.5*(1+Math.cos(now/1811))+75.5;
+		var force = 4.5*(1+Math.cos(now/2000))+76;
 		setDigit(3, Math.floor(force/10));
 		setDigit(4, Math.floor(force%10));
 
