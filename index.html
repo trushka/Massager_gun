@@ -11,7 +11,8 @@
 				font-size: 13px;
 				margin: 0px;
 				overflow: hidden;
-				-background: #999;
+				-
+				background: #999;
 			}
 			#_3d {
 				position: absolute;
@@ -20,6 +21,63 @@
 			#_3d canvas {
 				display: block;
 				transition: .8s
+			}
+			#_3d div {
+				position: absolute;
+				left: 50%;
+				--color: #cf9a17;
+				top: 50%;
+				color: var(--color);
+				border-radius: 100px;
+			}
+			#_3d .pointer {
+				--size: 1.1vh;
+				width: var(--size);
+				height: var(--size);
+				box-shadow: 0 0 0 1px;
+				margin: 1px calc(var(--size) / -2);
+				will-change: transform;
+			}
+			#_3d .pointer.power {
+				box-shadow: none;
+				--size: 1vh;
+			}
+			#_3d .pointer>div {
+				height: 11vh;
+				min-height: 68px;
+				background: var(--color);
+				margin: calc(var(--size) / 2 + .5px) -.5px;
+				width: 1px;
+				padding: 0;
+				transform-origin: center top;
+			}
+			#_3d .speed>div {
+				left: -0.5px;
+				transform: rotate(45deg) translateY(-1.5px);
+			}
+			#_3d .force>div {
+				left: auto;
+				right: -.5px;
+				transform: rotate(-45deg) translateY(-1.5px);
+			}
+
+			#_3d .pointer>div>div {
+				text-align: center;
+				white-space: nowrap;
+				background: #ffda;
+				color: #012;
+				top: 100%;
+				border-radius: 100px;
+				padding: .5em;
+				box-shadow: 0 0 0 2px var(--color);
+				transform: translateX(-50%);
+				transform-origin: center top;
+			}
+			#_3d .speed>div>div {
+				transform: translateX(-50%) rotate(-45deg);
+			}
+			#_3d .force>div>div {
+				transform: translateX(-50%) rotate(45deg);
 			}
 		</style>
 		<script src="js/three.min.js"></script>
@@ -30,7 +88,18 @@
 		<script src="js/threeCustom.js"></script>
 	</head>
 	<body ontouchstart="">
-		<div id="_3d"><canvas></canvas></div>
+		<div id="_3d">
+			<canvas></canvas>
+			<div class="pointer speed">
+				<div><div>Speed indicetion</div></div>
+			</div>
+			<div class="pointer force">
+				<div><div>Power indicetion</div></div>
+			</div>
+			<div class="pointer power">
+				<div><div>ON/OFF button</div></div>
+			</div>
+		</div>
 		<script src="js/main.js"></script>
 		
 		<!--
