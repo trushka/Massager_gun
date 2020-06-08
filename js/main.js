@@ -73,8 +73,8 @@ var loaded1, loaded2, paused, telOpacity,
 			if (val==animation.stage) console.log('stage:', animation.stage);
 			else console.warn(val,'<',animation.stage)
 		},
-		step: function(old, cond) {
-			if (animation.stage!=old) return false;
+		step: function(stage, cond) {
+			if (animation.stage!=stage-1) return false;
 			if (cond) console.log('stage:', ++animation.stage)
 			return cond;
 		}
@@ -116,7 +116,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	fan=scene.getObjectByName('Fan');
 	mGun.scale.multiplyScalar(10);
-	mGun.position.y=-.7;
+	mGun.position.y=-.7;//-6;//
+	//mGun.rotation.y=.04;
 
 	mGun.traverse(o=>{if (o.isMesh) {
 
@@ -162,20 +163,6 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	header.add(scene.getObjectByName('sphere'), scene.getObjectByName('Patron'));
 
-	// var screen=scene.getObjectByName('screen')
-	// screen.material = new THREE.MeshBasicMaterial({
-	// 	map: scrMap, color: '#fff',
-	// 	onBeforeCompile: function(sh){
-	// 		sh.vertexShader=sh.vertexShader.replace('#include <uv_vertex>',
-	// 			'vUv = ( uvTransform * vec3( (position.xy+vec2(0., -2.5))/156., 1 ) ).xy;');
-	// 		console.log(sh)
-	// 	}
-	// });
-	// screen.material.color.multiplyScalar(1.1);
-	// screen.material.toneMapped=false;//encoding=3007;
-
-	// scene.getObjectByName('glass_F').renderOrder=3;
-
 	var light=new THREE.DirectionalLight('#fff', .3);
 	light.position.set(-5.7,6,-7);
 	scene.add(light);
@@ -188,22 +175,34 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	oControls=new THREE.OrbitControls(camera, renderer.domElement);
 	//oControls.target.set(0,80.8,0);
 
-	var k0=.02, k=.025,
+	var k=.002, k0=.025,
 	 hidePhone, targDistance,
-	 t0=performance.now(), tCor=20, // 1000ms / 50fps
-	 tMax=100;
+	 tMax=100, tCor=20, // 1000ms / 50fps
+	 t0=performance.now(), t1=t0;
 
 	//oControls.update;
 	//oControls.enableDamping=true;
-	//oControls.autoRotate=true;
-	oControls.autoRotateSpeed=8;
+	oControls.autoRotate=true;
 	//oControls.minDistance=220;
 
 	oControls.update();
-	 targPos = vec3(-42, 11, 0);
+	 
 	var pos0=camera.position.set(300,700,-650).clone();
+	var m9=0, targM9=.6, targZoom=2.2;
 
 	scene.add(camera);
+
+	(animation.reset=function() {
+			oControls.autoRotateSpeed=0;
+			animation.stage=0;
+			k=k0;
+			targY=-6;
+			targPos = vec3(-42, 11, 0);
+			m9=0;
+			targM9=.6;
+			targZoom=2.2;
+			oControls.minDistance=0;
+	})();
 	
 	requestAnimationFrame(function animate(){
 
@@ -216,14 +215,35 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		 tScale=dt/tCor;
 
 		t0=now;
+		t1+=dt;
 
 		fan.rotation.y+=.15*tScale;
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
-		//if (k<k0) k+=.0002;
-		if (!oControls.autoRotate || animation.stage>6)
-		 camera.position.add(deltaPos.multiplyScalar(k*tScale)).add(deltaPos.cross(camera.up).multiplyScalar(2));
+		camera.position.add(deltaPos.multiplyScalar((animation.stage>1?k*k:k0)*tScale))
+		 .add(deltaPos.cross(camera.up).multiplyScalar(2));
+
+		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
+			container.classList.add('visible');
+			k=0;
+		}
+		if (animation.step(2, Math.abs(targM9-m9)<.01)) {
+			targZoom=1;
+			targM9=0;
+			targPos=pos0;
+			container.classList.remove('visible');
+			oControls.minDistance=44;
+			k=0;
+		}
+		if (animation.stage>0){
+			if (k<k0) k+=.0005/animation.stage;
+			camera.zoom+=(targZoom-camera.zoom)*k;
+			m9+=(targM9-m9)*k;
+			//mGun.position.y+=(targY-mGun.position.y)*k;
+			camera.updateProjectionMatrix();
+			camera.projectionMatrix.elements[9]=m9;
+		}
 
 		var velosity = 5.5*(1+Math.sin(now/2000))+5;
 		setDigit(1, Math.floor(velosity/10));
@@ -237,14 +257,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		renderer.render( scene, camera );
 
-		var scrPos=speedPos.clone().project(camera).multiply(vec3(50,-50,1));
-		speedDiv.style.transform='translate('+scrPos.x.toFixed(4)+'vw, '+scrPos.y.toFixed(4)+'vh)';
+		var scrPos=speedPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		speedDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
 
-		scrPos=forcePos.clone().project(camera).multiply(vec3(50,-50,1));
-		forceDiv.style.transform='translate('+scrPos.x.toFixed(4)+'vw, '+scrPos.y.toFixed(4)+'vh)';
+		scrPos=forcePos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		forceDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
 
-		scrPos=powerPos.clone().project(camera).multiply(vec3(50,-50,1));
-		powerDiv.style.transform='translate('+scrPos.x.toFixed(4)+'vw, '+scrPos.y.toFixed(4)+'vh)';
+		scrPos=powerPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		powerDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
 	})
 
 	if (loaded2) renderer.domElement.style.opacity=1;
