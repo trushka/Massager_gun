@@ -188,7 +188,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	oControls.update();
 	 
 	var pos0=camera.position.set(300,700,-650).clone();
-	var m9=0, targM9=.6, targZoom=2.2;
+	var m9=0, targM9=0, targZoom=2.2, rotation=0;
+	var targPos0 = vec3(-42, 11, 0), 
+		targPos=targPos0.clone(),
+		axis=vec3(-.3,1,0).normalize();
 
 	scene.add(camera);
 
@@ -197,11 +200,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			animation.stage=0;
 			k=k0;
 			targY=-6;
-			targPos = vec3(-42, 11, 0);
-			m9=0;
-			targM9=.6;
+			//m9=0;
 			targZoom=2.2;
 			oControls.minDistance=0;
+			console.log('reset');
 	})();
 	
 	requestAnimationFrame(function animate(){
@@ -221,29 +223,43 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
-		camera.position.add(deltaPos.multiplyScalar((animation.stage>1?k*k:k0)*tScale))
+		if (animation.stage>0){
+			if (k<k0) k+=.00025;
+			camera.zoom+=(targZoom-camera.zoom)*k*tScale;
+			//mGun.position.y+=(targY-mGun.position.y)*k;
+			camera.updateProjectionMatrix();
+		}
+		m9+=(targM9-m9)*k*tScale;
+		camera.projectionMatrix.elements[9]=m9;
+
+		if (!oControls.autoRotateSpeed) camera.position.add(deltaPos.multiplyScalar(k0*tScale))//(animation.stage>1?k:k0)
 		 .add(deltaPos.cross(camera.up).multiplyScalar(2));
 
+		if (animation.stage==2){// && m9<.55
+			targPos.applyAxisAngle(axis, tScale*k*k*60)
+			if (targPos.x<0 && targPos.z<0 && k>.01) animation.reset()
+		}
+		//animation.step(3, targPos.z>40);
+
+		if (animation.stage<2){
+			targPos.lerp(targPos0, k0*tScale);
+		}
+
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
+			targM9=.6;
 			container.classList.add('visible');
-			k=0;
+			k=0.00001;
 		}
 		if (animation.step(2, Math.abs(targM9-m9)<.01)) {
 			targZoom=1;
 			targM9=0;
-			targPos=pos0;
+			rotation+=Math.PI*2;
+			//targPos=();
 			container.classList.remove('visible');
-			oControls.minDistance=44;
-			k=0;
+			//oControls.minDistance=44;
+			k=0.00001;
 		}
-		if (animation.stage>0){
-			if (k<k0) k+=.0005/animation.stage;
-			camera.zoom+=(targZoom-camera.zoom)*k;
-			m9+=(targM9-m9)*k;
-			//mGun.position.y+=(targY-mGun.position.y)*k;
-			camera.updateProjectionMatrix();
-			camera.projectionMatrix.elements[9]=m9;
-		}
+
 
 		var velosity = 5.5*(1+Math.sin(now/2000))+5;
 		setDigit(1, Math.floor(velosity/10));
@@ -258,13 +274,13 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		renderer.render( scene, camera );
 
 		var scrPos=speedPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
-		speedDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
+		speedDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 
 		scrPos=forcePos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
-		forceDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
+		forceDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 
 		scrPos=powerPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
-		powerDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px) scale(var(--scale))';
+		powerDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 	})
 
 	if (loaded2) renderer.domElement.style.opacity=1;
