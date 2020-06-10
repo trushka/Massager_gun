@@ -105,12 +105,20 @@ loader.setDRACOLoader( dracoLoader );
 var mGun, fan, display, digits=[0, [],[],[],[]],
  speedPos=vec3(), forcePos=vec3(), powerPos,
  dMaterial=new THREE.MeshBasicMaterial({color: '#1118ff'}),
- inner=new THREE.MeshBasicMaterial({color:0}),
- header = new THREE.Group();
+ inner=new THREE.MeshBasicMaterial({color:0, side:1}),
+ inner2=new THREE.MeshBasicMaterial({color:0, side:2}),
+ header = new THREE.Group(),
+ mColor=new THREE.Color('#247'),
+ lColor=new THREE.Color('#ccb'),
+ mY={value: -90},
+ mAttenuation={value: 1},
+ lAttenuation={value: .03};
 
 scene.rotation.y=1.8;
 
 loader.load( 'm_gun.glb', function ( obj ) {
+
+	dracoLoader.dispose();
 
 	scene.add(mGun=obj.scene.getObjectByName('M_gun'));
 
@@ -121,6 +129,28 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	mGun.traverse(o=>{if (o.isMesh) {
 
+		o.material.side=0;
+
+		var isLamp=(o.name=='Lamp');
+
+		o.material.onBeforeCompile = function(sh){
+			sh.uniforms.color={value: isLamp?lColor:mColor};
+			sh.uniforms.attenuation=isLamp?lAttenuation:mAttenuation;
+			sh.uniforms.mY=mY;
+			sh.vertexShader='varying float vY;\n'+sh.vertexShader.replace('}', '	vY=worldPosition.y;\n}');
+
+			sh.fragmentShader='varying float vY;\nuniform vec3 color;\nuniform float mY, attenuation;\n'
+			 +sh.fragmentShader.replace('}',
+			 	'	gl_FragColor+=vec4(color,.2)*(1./(pow2(mY-vY-10.5)*attenuation+1.)'+
+			 	'+1./(pow2(mY-vY)*attenuation+1.)+1./(pow2(mY-vY+10.5)*attenuation+1.));\n}');
+			//if (isLamp) console.log(sh.fragmentShader)
+		}
+		if (isLamp) {
+			o.material.emissive.set('#030404');
+			o.material.color.set('#030608');
+			o.material.metalness=.97;
+		}
+
 		if (/Glass/.test(o.name)) {
 			o.material=new THREE.MeshPhysicalMaterial(o.material);
 			o.material.defines.PHYSICAL='';
@@ -128,8 +158,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			o.material.transparency=.9;
 			o.material.color.multiplyScalar(6)
 		}
-		if (/Display/.test(o.name)) {
-			o.material=inner; //mGun.getObjectByName('sphere').material;
+		if (/(Display)|(Inner)/.test(o.name)) {
+			o.material=inner2;
 		}
 		if (/(Digit)|(Power)/.test(o.parent.name+o.name)) {
 			//o.renderOrder=2;
@@ -148,7 +178,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			} else{
 				powerPos=o.localToWorld(o.geometry.boundingSphere.center.clone())
 			}
-			console.log(o.geometry.boundingSphere.center.toArray())
+			//console.log(o.geometry.boundingSphere.center.toArray())
 		}
 
 		o.geometry.computeVertexNormalsFine();
@@ -163,6 +193,20 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	header.add(scene.getObjectByName('sphere'), scene.getObjectByName('Patron'));
 
+	[
+		scene.getObjectByName('Back'),
+		scene.getObjectByName('Main'),
+		scene.getObjectByName('Top')
+		//scene.getObjectByName('Bottom'),
+	].forEach(o=>{
+		var obj=o.clone();
+		obj.material=inner;
+		obj.renderOrder=1;
+		mGun.add(obj);
+	});
+
+	//var lights=new THREE.Group();
+
 	var light=new THREE.DirectionalLight('#fff', .3);
 	light.position.set(-5.7,6,-7);
 	scene.add(light);
@@ -175,7 +219,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	oControls=new THREE.OrbitControls(camera, renderer.domElement);
 	//oControls.target.set(0,80.8,0);
 
-	var k=.002, k0=.025,
+	var k=.002, k0=.02,
 	 hidePhone, targDistance,
 	 tMax=100, tCor=20, // 1000ms / 50fps
 	 t0=performance.now(), t1=t0;
@@ -187,10 +231,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	oControls.update();
 	 
-	var pos0=camera.position.set(300,700,-650).clone();
+	var pos0=camera.position.set(1100,400,-150).clone();
 	var m9=0, targM9=0, targZoom=2.2, rotation=0;
-	var targPos0 = vec3(-42, 11, 0), 
-		targPos=targPos0.clone(),
+	var targPos0 = vec3(-42, 10, 0), 
+		targPos=vec3(120, 250, -50);//targPos0.clone(),
 		axis=vec3(-.3,1,0).normalize();
 
 	scene.add(camera);
@@ -219,9 +263,11 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		t0=now;
 		t1+=dt;
 
-		fan.rotation.y+=.15*tScale;
+		fan.rotation.y+=.32*tScale;
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
+
+		mY.value+=.22*(Math.abs(mY.value-5)/19+.64)*tScale;
 
 		if (animation.stage>0){
 			if (k<k0) k+=.00025;
@@ -237,7 +283,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		if (animation.stage==2){// && m9<.55
 			targPos.applyAxisAngle(axis, tScale*k*k*60)
-			if (targPos.x<0 && targPos.z<0 && k>.01) animation.reset()
+			if (targPos.x<15 && targPos.z<0 && k>.01) animation.reset()
 		}
 		//animation.step(3, targPos.z>40);
 
@@ -246,13 +292,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
-			targM9=.6;
+			targM9=.66;
 			container.classList.add('visible');
 			k=0.00001;
 		}
 		if (animation.step(2, Math.abs(targM9-m9)<.01)) {
-			targZoom=1;
+			targZoom=1.125;
 			targM9=0;
+			mY.value=-190;
 			rotation+=Math.PI*2;
 			//targPos=();
 			container.classList.remove('visible');
