@@ -270,7 +270,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		mY.value+=.22*(Math.abs(mY.value-5)/19+.64)*tScale;
 
 		if (animation.stage>0){
-			if (k<k0) k+=.00025;
+			if (k<k0) k+=.00025*tScale;
 			camera.zoom+=(targZoom-camera.zoom)*k*tScale;
 			//mGun.position.y+=(targY-mGun.position.y)*k;
 			camera.updateProjectionMatrix();
