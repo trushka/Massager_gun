@@ -62,6 +62,7 @@ scrMap.anisotropy=scrMap1.anisotropy=renderer.getMaxAnisotropy();
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	camera.aspect = canvas.width / canvas.height;
+	camera.zoom=Math.min(1, camera.aspect);
 	camera.updateProjectionMatrix();
 } )();
 
@@ -286,7 +287,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			mGun.scale.y=mGun.scale.z=mGun.scale.x;
 		}
 		m9+=(targM9-m9)*k*tScale;
-		camera.projectionMatrix.elements[9]=m9;
+		camera.projectionMatrix.elements[9]=m9*camera.zoom*camera.zoom;
 
 		if (!oControls.autoRotateSpeed) camera.position.add(deltaPos.multiplyScalar(k0*tScale))//(animation.stage>1?k:k0)
 		 .add(deltaPos.cross(camera.up).multiplyScalar(2));
