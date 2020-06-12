@@ -65,7 +65,7 @@ scrMap.anisotropy=scrMap1.anisotropy=renderer.getMaxAnisotropy();
 	camera.updateProjectionMatrix();
 } )();
 
-var loaded1, loaded2, paused, telOpacity,
+var loaded1, loaded2, paused, telOpacity, tex0,
 	animation= {
 		stage: 0,
 		setStage: function(val){
@@ -75,7 +75,7 @@ var loaded1, loaded2, paused, telOpacity,
 		},
 		step: function(stage, cond) {
 			if (animation.stage!=stage-1) return false;
-			if (cond) console.log('stage:', ++animation.stage)
+			if (cond) ++animation.stage;// console.log('stage:', )
 			return cond;
 		}
 	};
@@ -89,10 +89,18 @@ new THREE.RGBELoader()
 
 	scene.environment = envMap;
 
-	texture.dispose();
+	tex0=texture//.dispose();
 	pmremGenerator.dispose();
 	loaded2=true;
 })
+
+// scene.environment = new THREE.CubeTextureLoader()
+// .setPath( 'images/' ).load( [
+// 	'posx.jpg', 'negx.jpg',
+// 	'posy.jpg', 'negy.jpg',
+// 	'posz.jpg', 'negz.jpg'
+//  ],
+//  function(){loaded2=true} );
 
 var pmremGenerator = new THREE.PMREMGenerator( renderer );
 pmremGenerator.compileEquirectangularShader();
@@ -114,7 +122,7 @@ var mGun, fan, display, digits=[0, [],[],[],[]],
  mAttenuation={value: 1},
  lAttenuation={value: .03};
 
-scene.rotation.y=1.8;
+scene.rotation.y=1.1844;//1.8;
 
 loader.load( 'm_gun.glb', function ( obj ) {
 
@@ -176,7 +184,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 				if (match==3) (/1|2/.test(digit)?speedPos:forcePos).add(o.localToWorld(o.geometry.boundingSphere.center.clone()))
 			} else{
-				powerPos=o.localToWorld(o.geometry.boundingSphere.center.clone())
+				powerPos=o.localToWorld(o.geometry.boundingSphere.center.clone());
 			}
 			//console.log(o.geometry.boundingSphere.center.toArray())
 		}
@@ -186,8 +194,9 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		//o.material.side=0;
 
 	}});
-	speedPos.multiplyScalar(.5);
-	forcePos.multiplyScalar(.5);
+	mGun.worldToLocal(speedPos.multiplyScalar(.5));
+	mGun.worldToLocal(forcePos.multiplyScalar(.5));
+	mGun.worldToLocal(powerPos);
 
 	mGun.add(header);
 
@@ -245,7 +254,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			k=k0;
 			targY=-6;
 			//m9=0;
-			targZoom=2.2;
+			targZoom=.167;
 			oControls.minDistance=0;
 			console.log('reset');
 	})();
@@ -271,9 +280,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		if (animation.stage>0){
 			if (k<k0) k+=.00025*tScale;
-			camera.zoom+=(targZoom-camera.zoom)*k*tScale;
+			mGun.scale.x+=(targZoom-mGun.scale.x)*k*tScale;
 			//mGun.position.y+=(targY-mGun.position.y)*k;
-			camera.updateProjectionMatrix();
+			//camera.updateProjectionMatrix();
+			mGun.scale.y=mGun.scale.z=mGun.scale.x;
 		}
 		m9+=(targM9-m9)*k*tScale;
 		camera.projectionMatrix.elements[9]=m9;
@@ -283,7 +293,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		if (animation.stage==2){// && m9<.55
 			targPos.applyAxisAngle(axis, tScale*k*k*60)
-			if (targPos.x<15 && targPos.z<0 && k>.01) animation.reset()
+			if (targPos.x<13 && targPos.z<0 && k>.01) animation.reset()
 		}
 		//animation.step(3, targPos.z>40);
 
@@ -292,12 +302,13 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
-			targM9=.66;
+			targM9=.8;
 			container.classList.add('visible');
 			k=0.00001;
+			t1=0;
 		}
-		if (animation.step(2, Math.abs(targM9-m9)<.01)) {
-			targZoom=1.125;
+		if (animation.step(2, t1>10000)) {
+			targZoom=.115;
 			targM9=0;
 			mY.value=-190;
 			rotation+=Math.PI*2;
@@ -320,13 +331,13 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		renderer.render( scene, camera );
 
-		var scrPos=speedPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		var scrPos=mGun.localToWorld(speedPos.clone()).project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
 		speedDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 
-		scrPos=forcePos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		scrPos=mGun.localToWorld(forcePos.clone()).project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
 		forceDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 
-		scrPos=powerPos.clone().project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
+		scrPos=mGun.localToWorld(powerPos.clone()).project(camera).multiply(vec3(innerWidth/2, -innerHeight/2, 1));
 		powerDiv.style.transform='translate('+scrPos.x.toFixed(1)+'px, '+scrPos.y.toFixed(1)+'px)';
 	})
 

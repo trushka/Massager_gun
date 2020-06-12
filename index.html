@@ -9,7 +9,7 @@
 			body {
 				font-family: sans-serif;
 				font-size: 4vh;
-				font-size: max(13px, 4vh);
+				font-size: max(13px, 8vh);
 				margin: 0px;
 				overflow: hidden;
 				-
@@ -56,8 +56,8 @@
 				transition-delay: 2s;
 			}
 			#_3d .tooltip>div {
-				height: 4.5em;
-				min-height: 56px;
+				height: 1.5em;
+				/* min-height: 37px; */
 				background: var(--color);
 				margin: calc(var(--size) / 2 + .5px) -.5px;
 				width: 1px;
@@ -69,31 +69,39 @@
 			}
 			#_3d .speed>div {
 				left: -0.5px;
-				transform: rotate(45deg) translateY(-1.5px) scale(var(--scale));
+				transform: rotate(37deg) translateY(-1.5px) scale(var(--scale));
+				height: .8em;
 			}
 			#_3d .force>div {
 				left: auto;
 				right: -.5px;
-				transform: rotate(-45deg) translateY(-1.5px) scale(var(--scale));
+				transform: rotate(-37deg) translateY(-1.5px) scale(var(--scale));
+				height: .8em;
 			}
 
 			#_3d .tooltip>div>div {
 				text-align: center;
 				white-space: nowrap;
-				background: #ffda;
-				color: #012;
+				background: #000a;
+				color: #fff;
 				top: 100%;
 				border-radius: 100px;
 				padding: .3em .5em;
-				box-shadow: 0 0 0 2px var(--color);
+				box-shadow: 0 0 0 2px var(--color) inset;
 				transform: translateX(-50%);
 				transform-origin: center top;
+				line-height: 1em;
 			}
 			#_3d .speed>div>div {
-				transform: translateX(-50%) rotate(-45deg);
+				transform: rotate(-37deg);
+				transform-origin: calc(100% - .8em) center;
+				right: -.8em;
+				left: auto;
 			}
 			#_3d .force>div>div {
-				transform: translateX(-50%) rotate(45deg);
+				transform: rotate(37deg);
+				transform-origin: .8em center;
+				left: -.8em;
 			}
 		</style>
 		<script src="js/three.min.js"></script>
@@ -107,17 +115,21 @@
 		<div id="_3d">
 			<canvas></canvas>
 			<div class="tooltip speed">
-				<div><div>Speed indication</div></div>
+				<div><div>Speed</div></div>
 			</div>
 			<div class="tooltip force">
-				<div><div>Power indication</div></div>
+				<div><div>Power</div></div>
 			</div>
 			<div class="tooltip power">
 				<div><div>ON/OFF button</div></div>
 			</div>
 		</div>
 		<script src="js/main.js"></script>
-		
-		<!--
+		<input hidden type="range" style="
+		    width: 100%;
+		    position: absolute;
+		    bottom: 0;
+		" step="0.1">
+				
 	</body>
 </html>
