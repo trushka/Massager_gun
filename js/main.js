@@ -299,6 +299,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		if (animation.stage<2){
 			targPos.lerp(targPos0, k0*tScale);
+			if (t1>9000) container.classList.remove('visible');
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
@@ -313,7 +314,6 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			mY.value=-190;
 			rotation+=Math.PI*2;
 			//targPos=();
-			container.classList.remove('visible');
 			//oControls.minDistance=44;
 			k=0.00001;
 		}

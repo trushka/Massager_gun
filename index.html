@@ -9,19 +9,21 @@
 			body {
 				font-family: sans-serif;
 				font-size: 4vh;
-				font-size: max(13px, 8vh);
+				font-size: max(13px, 8vmin);
 				margin: 0px;
 				overflow: hidden;
 				-
 				background: #999;
 			}
 			#_3d {
-				position: absolute;
-				overflow: hidden;
+				position: relative;
+				/* overflow: hidden; */
+				/* height: 100%; */
+				/* width: 100%; */
 			}
 			#_3d canvas {
 				display: block;
-				transition: .8s
+				transition: .8s;
 			}
 			#_3d div {
 				position: absolute;
@@ -39,7 +41,7 @@
 				box-shadow: 0 0 0 1px;
 				margin: 1px calc(var(--size) / -2);
 				will-change: transform;
-				transition: opacity .8s 1s;
+				transition: opacity .8s 3s;
 				opacity: 0;
 			}
 			#_3d.visible .tooltip {
@@ -48,12 +50,12 @@
 			}
 
 			#_3d .tooltip.power {
-				transition-delay: 0s;
+				transition-delay: 2s;
 				box-shadow: none;
 				--size: 1vh;
 			}
 			#_3d .tooltip.speed {
-				transition-delay: 2s;
+				transition-delay: 1s;
 			}
 			#_3d .tooltip>div {
 				height: 1.5em;
@@ -103,6 +105,41 @@
 				transform-origin: .8em center;
 				left: -.8em;
 			}
+			#_3d .caption {
+				top: 6%;
+				background: #000b;
+				color: #fff;
+				border-radius: 100px;
+				padding: .3em .5em;
+				left: 0;
+				margin: auto;
+				right: 0;
+				transition: 1s;
+				opacity: 0;
+				width: 0;
+				box-shadow: 0 0 0 2px var(--color) inset;
+			}
+			#_3d .caption div{
+				overflow: hidden;
+				position: initial;
+				text-align: center;
+			}	
+			#_3d .caption div div{
+				/* width: 61vmax; */
+				white-space: nowrap;
+				/* transition: margin 1.5s; */
+				margin: 0 -31vmin;
+				color: lightgoldenrodyellow;
+			}
+			#_3d.visible .caption{
+				opacity: 1;
+				width: 61vmin;
+				padding: .3em .5em;
+			}	
+			#_3d.visible .caption div div{
+				/* margin:0; */
+			}	
+
 		</style>
 		<script src="js/three.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
@@ -122,6 +159,9 @@
 			</div>
 			<div class="tooltip power">
 				<div><div>ON/OFF button</div></div>
+			</div>
+			<div class="caption">
+				<div><div>LCD touch panel</div></div>
 			</div>
 		</div>
 		<script src="js/main.js"></script>
