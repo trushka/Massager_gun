@@ -287,14 +287,16 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			mGun.scale.y=mGun.scale.z=mGun.scale.x;
 		}
 		m9+=(targM9-m9)*k*tScale;
-		camera.projectionMatrix.elements[9]=m9*camera.zoom*camera.zoom;
+		camera.projectionMatrix.elements[9]=m9*camera.zoom*camera.zoom*camera.zoom;
 
 		if (!oControls.autoRotateSpeed) camera.position.add(deltaPos.multiplyScalar(k0*tScale))//(animation.stage>1?k:k0)
 		 .add(deltaPos.cross(camera.up).multiplyScalar(2));
 
 		if (animation.stage==2){// && m9<.55
-			targPos.applyAxisAngle(axis, tScale*k*k*60)
-			if (targPos.x<13 && targPos.z<0 && k>.01) animation.reset()
+			targPos.applyAxisAngle(axis, tScale*k*k*60);
+			if (t1>10000 && targPos.x<13 && targPos.z<0 && k>.01) animation.reset();
+			if (t1>1000) container.classList.add('battery');
+			if (t1>6000) container.classList.remove('battery');
 		}
 		//animation.step(3, targPos.z>40);
 
@@ -310,9 +312,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			t1=0;
 		}
 		if (animation.step(2, t1>10000)) {
+			t1=0;
 			targZoom=.115;
 			targM9=0;
-			mY.value=-190;
+			mY.value=-240;
 			rotation+=Math.PI*2;
 			//targPos=();
 			//oControls.minDistance=44;

@@ -31,6 +31,7 @@
 				--color: #cf9a17;
 				top: 50%;
 				color: var(--color);
+				text-shadow: 0 0 .15em;
 				border-radius: 100px;
 			}
 			#_3d .tooltip {
@@ -58,7 +59,7 @@
 				transition-delay: 1s;
 			}
 			#_3d .tooltip>div {
-				height: 1.5em;
+				height: calc( 34vh - 22vw );
 				/* min-height: 37px; */
 				background: var(--color);
 				margin: calc(var(--size) / 2 + .5px) -.5px;
@@ -108,7 +109,6 @@
 			#_3d .caption {
 				top: 6%;
 				background: #000a;
-				color: #fff;
 				border-radius: 100px;
 				padding: .3em .5em;
 				left: 0;
@@ -123,23 +123,37 @@
 				overflow: hidden;
 				position: initial;
 				text-align: center;
+				color: #f7f7be;
 			}	
 			#_3d .caption div div{
 				/* width: 61vmax; */
 				white-space: nowrap;
 				/* transition: margin 1.5s; */
 				margin: 0 -31vmin;
-				color: #fafad2;
 			}
-			#_3d.visible .caption{
+			#_3d.visible .caption.lcd{
 				opacity: 1;
 				width: 61vmin;
-				padding: .3em .5em;
 			}	
 			#_3d.visible .caption div div{
 				/* margin:0; */
 			}	
-
+			#_3d .caption.b {
+				top: auto;
+				bottom: 5%;
+				font-size: 90%;
+				color: #fafad2 !important;
+			}
+			#_3d.battery .caption.b{
+				opacity: 1;
+				width: 70vmin;
+			}	
+			#_3d.battery .caption.b>div{
+				animation: flash 1.5s 1s;
+			}
+			@keyframes flash {
+				50% {filter: brightness(1.3); animation-timing-function: ease-in-out;}
+			}
 		</style>
 		<script src="js/three.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
@@ -160,8 +174,11 @@
 			<div class="tooltip power">
 				<div><div>ON/OFF button</div></div>
 			</div>
-			<div class="caption">
+			<div class="caption lcd">
 				<div><div>LCD touch panel</div></div>
+			</div>
+			<div class="caption b">
+				<div><div>large capacity and<br> efficient battery</div></div>
 			</div>
 		</div>
 		<script src="js/main.js"></script>
