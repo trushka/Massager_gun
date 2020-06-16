@@ -150,14 +150,14 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 			sh.fragmentShader='varying float vY;\nuniform vec3 color;\nuniform float mY, attenuation;\n'
 			 +sh.fragmentShader.replace('}',
-			 	'	gl_FragColor+=vec4(color,.2)*(1./(pow2(mY-vY-10.5)*attenuation+1.)'+
-			 	'+1./(pow2(mY-vY)*attenuation+1.)+1./(pow2(mY-vY+10.5)*attenuation+1.));\n}');
+			 	'	gl_FragColor+=vec4(color,.2)*(1./(pow2(mY-vY-10.)*attenuation+1.)'+
+			 	'+1./(pow2(mY-vY)*attenuation+1.)+1./(pow2(mY-vY+10.)*attenuation+1.));\n}');
 			//if (isLamp) console.log(sh.fragmentShader)
 		}
 		if (isLamp) {
-			o.material.emissive.set('#030404');
-			o.material.color.set('#030608');
-			o.material.metalness=.97;
+			o.material.emissive.set('#020203');
+			o.material.color.set('#07090b');
+			o.material.metalness=.98;
 		}
 
 		if (/Glass/.test(o.name)) {
@@ -165,7 +165,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			o.material.defines.PHYSICAL='';
 			o.material.transparent=true;
 			o.material.transparency=.9;
-			o.material.color.multiplyScalar(6)
+			o.material.color.multiplyScalar(6);
+			o.material.envMapIntensity=1.5;
 		}
 		if (/(Display)|(Inner)/.test(o.name)) {
 			o.material=inner2;
@@ -241,10 +242,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	oControls.update();
 	 
-	var pos0=camera.position.set(1100,400,-150).clone();
+	var pos0=camera.position.set(300,700,-650).clone();
 	var m9=0, targM9=0, targZoom=2.2, rotation=0;
 	var targPos0 = vec3(-42, 10, 0), 
-		targPos=vec3(120, 250, -50);//targPos0.clone(),
+		targPos=vec3(59, 10, 5),//targPos0.clone(),//
 		axis=vec3(-.3,1,0).normalize();
 
 	scene.add(camera);
@@ -257,9 +258,15 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			//m9=0;
 			targZoom=.167;
 			oControls.minDistance=0;
+			container.classList.remove('typewriter');
 			console.log('reset');
 	})();
-	
+	//container.classList.add('typewriter');
+
+	var battery = container.querySelector('.b div');
+	//battery.onanimationiteration=//function(){mY.value=-90};
+	battery.onanimationstart=function(){mY.value=-55};
+
 	requestAnimationFrame(function animate(){
 
 		requestAnimationFrame(animate);
@@ -277,7 +284,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
-		mY.value+=.22*(Math.abs(mY.value-5)/19+.64)*tScale;
+		mY.value+=.24*(Math.abs(mY.value-5)/19+.65)*tScale;
 
 		if (animation.stage>0){
 			if (k<k0) k+=.00025*tScale;
@@ -292,11 +299,15 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		if (!oControls.autoRotateSpeed) camera.position.add(deltaPos.multiplyScalar(k0*tScale))//(animation.stage>1?k:k0)
 		 .add(deltaPos.cross(camera.up).multiplyScalar(2));
 
-		if (animation.stage==2){// && m9<.55
+		if (animation.stage>1){// && m9<.55
 			targPos.applyAxisAngle(axis, tScale*k*k*60);
 			if (t1>10000 && targPos.x<13 && targPos.z<0 && k>.01) animation.reset();
-			if (t1>1000) container.classList.add('battery');
-			if (t1>6000) container.classList.remove('battery');
+			if (animation.step(3, t1>1000)) container.classList.add('battery');
+			if (animation.step(4, t1>4000)) container.classList.add('typewriter');
+			if (animation.step(5, t1>6800)) container.classList.remove('battery');
+			if (animation.step(6, mY.value>28)) mY.value=-55;
+			//if (animation.step(7, t1>9500)) container.classList.remove('typewriter');
+			
 		}
 		//animation.step(3, targPos.z>40);
 
@@ -305,7 +316,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			if (t1>9000) container.classList.remove('visible');
 		}
 
-		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<85)) {
+		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<78)) {
+			container.classList.remove('typewriter');
 			targM9=.8;
 			container.classList.add('visible');
 			k=0.00001;
@@ -315,7 +327,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			t1=0;
 			targZoom=.115;
 			targM9=0;
-			mY.value=-240;
+			//mY.value=-250;
 			rotation+=Math.PI*2;
 			//targPos=();
 			//oControls.minDistance=44;
