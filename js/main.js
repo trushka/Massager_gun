@@ -262,9 +262,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			oControls.minDistance=0;
 			container.classList.remove('typewriter');
 			console.log('reset');
-			targV=17.5+Math.random()*16;
-			targF=50.5+Math.random()*21;
-			velocity=force=-1;
+			//velocity=force=-1;
 	})();
 	//container.classList.add('typewriter');
 
@@ -272,9 +270,16 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	//battery.onanimationiteration=//function(){mY.value=-90};
 	battery.onanimationstart=function(){mY.value=-55};
 	container.addEventListener('transitionstart', function(e){
+		//if (!this.classList.contains('visible')) return;
 		//console.log(e);
-		if (e.target.classList.contains('speed') && velocity==-1) velocity=-0.9
-		if (e.target.classList.contains('force') && force==-1) force=-0.9
+		if (e.target.classList.contains('speed')) {
+			//velocity=-0.9;
+			targV=12.5+Math.random()*25;
+		}
+		if (e.target.classList.contains('force')) {
+			targF=45.5+Math.random()*31;
+			//force=-0.9
+		}
 	})
 
 	requestAnimationFrame(function animate(){
@@ -327,8 +332,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			if (t1>9000) container.classList.remove('visible');
 		}
 		if (animation.stage>=1){
-			if (velocity>-1) velocity+=(targV-velocity)*tScale*.3/targV;
-			if (force>-1) force+=(targF-force)*tScale*.3/targF;
+			if (targV) velocity+=(targV-velocity)*tScale*.3/targV;
+			if (targF) force+=(targF-force)*tScale*.3/targF;
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<78)) {
