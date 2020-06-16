@@ -19,7 +19,8 @@ var segments=[
 	[6,5,4,3,2,0],
 	[6,1,2],
 	[1,2,3,4,5,6,0],
-	[3,2,1,6,5,0]
+	[3,2,1,6,5,0],
+	[0]
 ]
 
 
@@ -246,7 +247,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 	var m9=0, targM9=0, targZoom=2.2, rotation=0;
 	var targPos0 = vec3(-42, 10, 0), 
 		targPos=vec3(59, 10, 5),//targPos0.clone(),//
-		axis=vec3(-.3,1,0).normalize();
+		axis=vec3(-.3,1,0).normalize(),
+		velocity=-1, force=-1, targV, targF;
 
 	scene.add(camera);
 
@@ -260,12 +262,20 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			oControls.minDistance=0;
 			container.classList.remove('typewriter');
 			console.log('reset');
+			targV=17.5+Math.random()*16;
+			targF=50.5+Math.random()*21;
+			velocity=force=-1;
 	})();
 	//container.classList.add('typewriter');
 
 	var battery = container.querySelector('.b div');
 	//battery.onanimationiteration=//function(){mY.value=-90};
 	battery.onanimationstart=function(){mY.value=-55};
+	container.addEventListener('transitionstart', function(e){
+		//console.log(e);
+		if (e.target.classList.contains('speed') && velocity==-1) velocity=-0.9
+		if (e.target.classList.contains('force') && force==-1) force=-0.9
+	})
 
 	requestAnimationFrame(function animate(){
 
@@ -306,6 +316,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 			if (animation.step(4, t1>4000)) container.classList.add('typewriter');
 			if (animation.step(5, t1>6800)) container.classList.remove('battery');
 			if (animation.step(6, mY.value>28)) mY.value=-55;
+			//if (animation.step(7, t1>7000)) velocity=force=-1;
 			//if (animation.step(7, t1>9500)) container.classList.remove('typewriter');
 			
 		}
@@ -314,6 +325,10 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		if (animation.stage<2){
 			targPos.lerp(targPos0, k0*tScale);
 			if (t1>9000) container.classList.remove('visible');
+		}
+		if (animation.stage>=1){
+			if (velocity>-1) velocity+=(targV-velocity)*tScale*.3/targV;
+			if (force>-1) force+=(targF-force)*tScale*.3/targF;
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<78)) {
@@ -335,11 +350,11 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		}
 
 
-		var velosity = 5.5*(1+Math.sin(now/2000))+5;
-		setDigit(1, Math.floor(velosity/10));
-		setDigit(2, Math.floor(velosity%10));
+		//var velocity = 5.5*(1+Math.sin(now/2000))+5;
+		setDigit(1, Math.floor(velocity/10));
+		setDigit(2, Math.floor(velocity%10));
 
-		var force = 4.5*(1+Math.cos(now/2000))+76;
+		//var force = 4.5*(1+Math.cos(now/2000))+76;
 		setDigit(3, Math.floor(force/10));
 		setDigit(4, Math.floor(force%10));
 
@@ -362,6 +377,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 } );
 
 function setDigit(digit, value) {
+	if (value<0) value=10;
 	if (!digits[digit] || digits[digit].value===value) return;
 	digits[digit].value=value;
 	digits[digit].forEach(function(seg, i){
