@@ -1,7 +1,3 @@
-var scrImg,//='GALAXY_S20_screen.jpg',
-	scrLogo='samsung.svg',
-	scrVideo='surf.mp4';
-
 var lightPositions=[
 	[12.799999999999999, 69.14646301269532, -10.7],
 
@@ -21,8 +17,7 @@ var segments=[
 	[1,2,3,4,5,6,0],
 	[3,2,1,6,5,0],
 	[0]
-]
-
+];
 
 var container=document.querySelector('#_3d'),
 	canvas = container.querySelector('canvas'),
@@ -31,23 +26,6 @@ var container=document.querySelector('#_3d'),
 	powerDiv = container.querySelector('.power');
 var renderer =new THREE.WebGLRenderer( {alpha:true, antialias: true, canvas:canvas } );
 var lookAt, targZoom;
-var scrMap=new THREE.TextureLoader().load(scrImg||'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=');
-var scrMap1=new THREE.TextureLoader().load(scrLogo);
-scrMap1.repeat.set(.8, .8);
-scrMap1.offset.set(.5, .5);
-scrMap.offset.set(.5, .5);
-
-var video=document.createElement('video'),
-	vMap = new THREE.VideoTexture(video);
-video.oncanplay=function(){
-	video.play();
-	vMap.repeat.x=video.videoHeight/video.videoWidth
-	vMap.offset.set(.5, .5)
-}
-video.muted=true;
-video.src=scrVideo;
-
-//scrMap1.flipY=scrMap.flipY=false;
 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 45, 1, 10, 2000 );
@@ -56,8 +34,6 @@ var camera = new THREE.PerspectiveCamera( 45, 1, 10, 2000 );
 
 renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.toneMappingExposure=2.35;
-
-scrMap.anisotropy=scrMap1.anisotropy=renderer.getMaxAnisotropy();
 
 (window.onresize = function () {
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -110,6 +86,7 @@ var loader = new THREE.GLTFLoader();
 
 var dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath( 'js/' );
+dracoLoader.preload();
 loader.setDRACOLoader( dracoLoader );
 
 var mGun, fan, display, digits=[0, [],[],[],[]],
@@ -203,7 +180,7 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 	mGun.add(header);
 
-	header.add(scene.getObjectByName('sphere'), scene.getObjectByName('Patron'));
+	header.add(scene.getObjectByName('sphere'), scene.getObjectByName('Pin')); //, scene.getObjectByName('Patron')
 
 	[
 		scene.getObjectByName('Back'),
@@ -296,6 +273,8 @@ loader.load( 'm_gun.glb', function ( obj ) {
 		t1+=dt;
 
 		fan.rotation.y+=.32*tScale;
+		header.position.x=1.5*Math.sin(t1/23)-1.2;
+
 		var deltaPos=targPos.clone().sub(camera.position),
 			dl=deltaPos.lengthSq(), deltaTarg, angle;
 
@@ -329,11 +308,11 @@ loader.load( 'm_gun.glb', function ( obj ) {
 
 		if (animation.stage<2){
 			targPos.lerp(targPos0, k0*tScale);
-			if (t1>9000) container.classList.remove('visible');
+			if (t1>7500) container.classList.remove('visible');
 		}
 		if (animation.stage>=1){
-			if (targV) velocity+=(targV-velocity)*tScale*.3/targV;
-			if (targF) force+=(targF-force)*tScale*.3/targF;
+			if (targV) velocity+=(targV-velocity)*tScale*.35/targV;
+			if (targF) force+=(targF-force)*tScale*.5/targF;
 		}
 
 		if (animation.step(1, camera.position.manhattanDistanceTo(mGun.position)<78)) {
